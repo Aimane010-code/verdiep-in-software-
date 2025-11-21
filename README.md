@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unity VRChat Avatar Verdieping</title>
+<style>
+:root {
+    --dark-bg: #0d1b2a;
+    --dark-text: #e0e1dd;
+    --light-bg: #f4f4f4;
+    --light-text: #111;
+    --primary: #1b263b;
+    --accent: #415a77;
+    --accent-hover: #607b96;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+    transition: all 0.3s ease;
+    line-height: 1.6;
+    scroll-behavior: smooth;
+}
+header {
+    background-color: var(--primary);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+}
+nav a {
+    color: var(--dark-text);
+    text-decoration: none;
+    margin-left: 1rem;
+    font-weight: bold;
+    position: relative;
+}
+nav a::after {
+    content: '';
+    display: block;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s;
+    width: 0;
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+}
+nav a:hover::after {
+    width: 100%;
+}
+.container {
+    padding: 2rem;
+    max-width: 1100px;
+    margin: auto;
+}
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: background 0.3s, transform 0.2s;
+}
+.btn:hover {
+    transform: scale(1.05);
+}
+.btn-light {
+    background-color: var(--accent);
+    color: var(--dark-text);
+}
+.btn-light:hover {
+    background-color: var(--accent-hover);
+}
+.btn-dark {
+    background-color: var(--dark-text);
+    color: var(--primary);
+}
+.search-bar {
+    margin: 1rem 0 2rem;
+    display: flex;
+}
+.search-bar input {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border-radius: 5px 0 0 5px;
+    border: none;
+}
+.search-bar button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0 5px 5px 0;
+    background-color: var(--accent);
+    color: var(--dark-text);
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.search-bar button:hover {
+    background-color: var(--accent-hover);
+}
+.page {
+    display: none;
+    animation: fadeIn 0.6s ease-in-out;
+}
+.active {
+    display: block;
+}
+h2 {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 0.3rem;
+    margin-top: 2rem;
+}
+h3 {
+    margin-top: 1rem;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+th, td {
+    border: 1px solid var(--accent);
+    padding: 0.6rem;
+    text-align: left;
+}
+th {
+    background-color: var(--accent);
+    color: var(--dark-text);
+}
+tr:hover {
+    background-color: var(--accent-hover);
+}
+ol, ul {
+    padding-left: 1.5rem;
+}
+li {
+    margin: 0.5rem 0;
+}
+pre {
+    background-color: #1b263b;
+    color: var(--dark-text);
+    padding: 0.5rem;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+body.light-mode {
+    background-color: var(--light-bg);
+    color: var(--light-text);
+}
+body.light-mode header {
+    background-color: var(--accent);
+}
+body.light-mode nav a {
+    color: var(--light-text);
+}
+body.light-mode .btn-light {
+    background-color: var(--primary);
+    color: var(--light-text);
+}
+body.light-mode .btn-dark {
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+}
+body.light-mode .search-bar button {
+    background-color: var(--primary);
+    color: var(--light-text);
+}
+footer {
+    text-align: center;
+    padding: 1rem;
+    margin-top: 3rem;
+    border-top: 1px solid var(--accent);
+}
+
+/* Extra effecten */
+.page h2 {
+    transition: color 0.3s;
+}
+.page p, .page li, .page td {
+    transition: color 0.3s;
+}
+
+/* FOTO-PAGINA STYLING */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.photo {
+    background-color: var(--primary);
+    padding: 0.5rem;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, background-color 0.3s;
+}
+.photo:hover {
+    transform: scale(1.05);
+    background-color: var(--accent-hover);
+}
+.photo img {
+    max-width: 100%;
+    border-radius: 5px;
+}
+
+/* Lightbox */
+#lightbox {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+#lightbox img {
+    max-width: 80%;
+    max-height: 80%;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+#lightbox p {
+    color: #fff;
+}
+#lightbox #close {
+    position: absolute;
+    top: 20px;
+    right: 40px;
+    font-size: 3rem;
+    color: #fff;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Unity VRChat Avatar Verdieping</h1>
+    <nav>
+        <a href="#" data-page="home">Home</a>
+        <a href="#" data-page="verslag">Verslag</a>
+        <a href="#" data-page="reflectieverslag">Reflectieverslag</a>
+        <a href="#" data-page="logboek">Logboek</a>
+        <a href="#" data-page="planning">Planning</a>
+        <a href="#" data-page="fotos">Foto's</a>
+    </nav>
+    <button class="btn btn-light" id="toggleTheme">🌙</button>
+</header>
+
+<div class="container">
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Zoek...">
+        <button onclick="searchContent()">Zoeken</button>
+    </div>
+
+    <!-- Home -->
+    <div id="home" class="page active">
+        <h2>Welkom!</h2>
+        <p>Welkom bij mijn verdieping in Unity en VRChat Avatars. Gebruik het menu om naar de verschillende secties te gaan.</p>
+    </div>
+
+    <!-- Verslag -->
+    <div id="verslag" class="page">
+        <h2>Voorblad</h2>
+        <p>
+            Keuzedeel: Verdieping Software<br>
+            Project: Unity – VRChat Avatar Build<br>
+            Schooljaar: 2025–2026<br>
+            Begeleider: [docent]
+        </p>
+        <h2>Inhoudsopgave</h2>
+        <ol>
+            <li>Inleiding</li>
+            <li>Oriëntatie & Onderzoek (Opdracht 1)</li>
+            <li>Onderbouwing Softwarekeuze (Opdracht 2)</li>
+            <li>Leertraject (Opdracht 3)</li>
+            <li>Het Prototype (Opdracht 4)</li>
+            <li>Planning & Logboek</li>
+            <li>Reflectie & Slot</li>
+        </ol>
+        <h2>1. Inleiding</h2>
+        <h3>1.1 Doel van het project</h3>
+        <p>Het doel van dit project is om mij te verdiepen in softwareontwikkeling en 3D-workflows door het maken van een VRChat Avatar in Unity.</p>
+        <h3>1.2 Waarom VRChat Avatars?</h3>
+        <p>Ik maak in mijn vrije tijd avatars, maar zonder professionele opbouw. Met dit project leer ik hoe ik dit gestructureerd aanpak en hoe ik performance behoud en de Unity → VRChat pipeline technisch begrijp.</p>
+        <h3>1.3 Wat ik al wist en wilde leren</h3>
+        <ul>
+            <li>Echte workflow met Unity 2022</li>
+            <li>Gebruik van VRChat SDK 3 – Avatars</li>
+            <li>Animaties instellen</li>
+            <li>Visuele shaders</li>
+            <li>Veiligheid & performance regels</li>
+        </ul>
+        <h2>2. Oriëntatie & Onderzoek (Opdracht 1)</h2>
+        <h3>2.1 Onderzoek naar software</h3>
+        <table>
+            <tr><th>Software</th><th>Functie</th><th>Voordelen</th><th>Nadelen</th></tr>
+            <tr><td>Unity</td><td>Avatar upload + rigging</td><td>SDK support, stabiliteit</td><td>Veel instellingen</td></tr>
+            <tr><td>Blender</td><td>3D modeleren</td><td>Gratis, krachtig</td><td>Moeilijk te leren</td></tr>
+            <tr><td>VRChat Creator Companion</td><td>SDK beheer</td><td>Makkelijk starten</td><td>Alleen VRChat gerelateerd</td></tr>
+        </table>
+        <h2>3. Onderbouwing Softwarekeuze (Opdracht 2)</h2>
+        <p>Unity is verplicht voor VRChat. Controle over rig, materials, animaties en tutorials zijn beschikbaar. SDK3 is vereist voor performance feedback en upload.</p>
+        <h2>4. Leertraject (Opdracht 3)</h2>
+        <ul>
+            <li>Unity leren: Avatar descriptors, Eye-tracking, Visemes, Materials & shaders, Animations layers</li>
+            <li>Blender workflow: Meshes, Rigging, Export naar Unity</li>
+            <li>VRChat Creator Companion: SDK installatie, Templates, Performance ranking, Upload systeem</li>
+        </ul>
+        <h2>5. Prototype (Opdracht 4)</h2>
+        <p>Simpele humanoid stijl avatar die ik zelf leuk vind. Unity setup inclusief Avatar descriptor, materials, animatie en upload naar VRChat. Resultaat: correcte beweging, lip sync, eye tracking, goede performance.</p>
+    </div>
+
+    <!-- Reflectieverslag -->
+    <div id="reflectieverslag" class="page">
+        <h2>Reflectieverslag</h2>
+        <p>Hier reflecteer ik op mijn projectperiode volgens de STARR-methode:</p>
+
+        <h3>Situatie</h3>
+        <p>Tijdens het project heb ik gewerkt aan het maken van een VRChat Avatar, van concept tot upload.</p>
+
+        <h3>Taak</h3>
+        <p>Mijn taak was om de volledige workflow zelfstandig uit te voeren, van Blender naar Unity, inclusief rigging, shaders en animaties.</p>
+
+        <h3>Actie</h3>
+        <ul>
+            <li>Blender gebruikt om meshes en rigging aan te passen</li>
+            <li>Unity gebruikt om Avatar Descriptor en animaties in te stellen</li>
+            <li>VRChat SDK3 toegepast voor performance feedback</li>
+        </ul>
+
+        <h3>Resultaat</h3>
+        <ul>
+            <li>Avatar succesvol geüpload naar VRChat</li>
+            <li>Functionerende lip sync en eye tracking</li>
+            <li>Verbeterde kennis van 3D workflows en Unity</li>
+        </ul>
+
+        <h3>Reflectie</h3>
+        <ul>
+            <li>Wat ging goed: Planning en test uploads werkten goed</li>
+            <li>Wat kan beter: Mesh optimalisatie en tijdmanagement</li>
+            <li>Wat geleerd: Zelfstandig problemen oplossen en workflow verbeteren</li>
+        </ul>
+    </div>
+
+    <!-- Logboek -->
+    <div id="logboek" class="page">
+        <h2>Logboek</h2>
+        <p>Hier houd ik wekelijks bij wat ik heb gedaan en hoe lang het duurde:</p>
+        <table>
+            <tr><th>Datum</th><th>Activiteit</th><th>Tijd (min)</th></tr>
+            <tr><td>2 okt</td><td>Unity + VRC installeren</td><td>60</td></tr>
+            <tr><td>3 okt</td><td>Unity interface leren</td><td>45</td></tr>
+            <tr><td>4 okt</td><td>Eerste VRChat template</td><td>90</td></tr>
+            <tr><td>6 okt</td><td>Testwereld bouwen</td><td>120</td></tr>
+            <tr><td>8 okt</td><td>Upload testworld</td><td>45</td></tr>
+            <tr><td>10 okt</td><td>Documentatie VRChat</td><td>60</td></tr>
+            <tr><td>12 okt</td><td>Concept VRChat world</td><td>30</td></tr>
+            <tr><td>14 okt</td><td>Bouw eigen world start</td><td>90</td></tr>
+            <tr><td>3 nov</td><td>Objecten toevoegen</td><td>120</td></tr>
+            <tr><td>5 nov</td><td>Colliders + interacties</td><td>90</td></tr>
+            <tr><td>8 nov</td><td>Light baking</td><td>60</td></tr>
+            <tr><td>12 nov</td><td>Animatie deur</td><td>90</td></tr>
+            <tr><td>15 nov</td><td>Audio toevoegen</td><td>45</td></tr>
+            <tr><td>18 nov</td><td>Verslag tekst</td><td>60</td></tr>
+            <tr><td>20 nov</td><td>Proef upload</td><td>45</td></tr>
+            <tr><td>2 dec</td><td>Skybox + licht</td><td>90</td></tr>
+            <tr><td>5 dec</td><td>Materialen aanpassen</td><td>60</td></tr>
+            <tr><td>8 dec</td><td>Particle test</td><td>45</td></tr>
+            <tr><td>10 dec</td><td>Performance testen</td><td>45</td></tr>
+            <tr><td>14 dec</td><td>Eindversie world</td><td>120</td></tr>
+            <tr><td>18 dec</td><td>Verslag bijwerken</td><td>60</td></tr>
+            <tr><td>1 jan</td><td>Reflectieverslag schrijven</td><td>60</td></tr>
+            <tr><td>1 jan</td><td>Verslag afronden</td><td>60</td></tr>
+            <tr><td><strong>Totaaltijd (min)</strong></td><td></td><td>1590</td></tr>
+        </table>
+    </div>
+
+    <!-- Planning -->
+    <div id="planning" class="page">
+        <h2>Planning</h2>
+        <p>Voortschrijdende planning van mijn project:</p>
+        <table>
+            <tr><th>Maand</th><th>Activiteiten</th></tr>
+            <tr><td>Oktober</td><td>Unity + VCC installeren, Basis avatar importeren, Blender model aanpassen, Eerste testavatar uploaden</td></tr>
+            <tr><td>November</td><td>Rigging + visemes, Materials & shaders verbeteren, Animatie layers leren, Tweede upload testen</td></tr>
+            <tr><td>December</td><td>Performance optimaliseren, Extra expressies toevoegen, Eindversie avatar importeren</td></tr>
+            <tr><td>Januari</td><td>Reflectie schrijven, Verslag afronden</td></tr>
+        </table>
+    </div>
+
+    <!-- Foto's pagina -->
+    <div id="fotos" class="page">
+        <h2>Mijn Foto's</h2>
+        <p>Klik op een afbeelding om deze groter te bekijken.</p>
+        <div class="gallery">
+            <div class="photo"><img src="foto1.jpg" alt="Blender model" onclick="openLightbox(this)"><p>Foto 1: Blender model</p></div>
+            <div class="photo"><img src="foto2.jpg" alt="Unity setup" onclick="openLightbox(this)"><p>Foto 2: Unity setup</p></div>
+            <div class="photo"><img src="foto3.jpg" alt="Upload naar VRChat" onclick="openLightbox(this)"><p>Foto 3: Upload naar VRChat</p></div>
+            <div class="photo"><img src="foto4.jpg" alt="Avatar descriptor" onclick="openLightbox(this)"><p>Foto 4: Avatar descriptor</p></div>
+            <div class="photo"><img src="foto5.jpg" alt="Shader test" onclick="openLightbox(this)"><p>Foto 5: Shader test</p></div>
+            <div class="photo"><img src="foto6.jpg" alt="Animatie layers" onclick="openLightbox(this)"><p>Foto 6: Animatie layers</p></div>
+            <div class="photo"><img src="foto7.jpg" alt="Performance test" onclick="openLightbox(this)"><p>Foto 7: Performance test</p></div>
+            <div class="photo"><img src="foto8.jpg" alt="Eindresultaat" onclick="openLightbox(this)"><p>Foto 8: Eindresultaat</p></div>
+        </div>
+    </div>
+
+    <!-- Lightbox overlay -->
+    <div id="lightbox">
+        <span id="close" onclick="closeLightbox()">&times;</span>
+        <img id="lightbox-img" src="" alt="">
+        <p id="lightbox-caption"></p>
+    </div>
+
+</div>
+
+<footer>
+    &copy; 2025 Mijn VRChat Avatar Project
+</footer>
+
+<script>
+// Pagina navigatie
+const links = document.querySelectorAll('nav a');
+const pages = document.querySelectorAll('.page');
+
+links.forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const pageId = link.getAttribute('data-page');
+        pages.forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+    });
+});
+
+// Thema wisselen
+const toggleTheme = document.getElementById('toggleTheme');
+toggleTheme.addEventListener('click', () => {
+    document.body.classList.toggle('light-mode');
+    toggleTheme.textContent = document.body.classList.contains('light-mode') ? '🌙' : '☀️';
+});
+
+// Lightbox functies
+function openLightbox(img) {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const caption = document.getElementById('lightbox-caption');
+    lightbox.style.display = 'flex';
+    lightboxImg.src = img.src;
+    caption.textContent = img.alt;
+}
+function closeLightbox() {
+    document.getElementById('lightbox').style.display = 'none';
+}
+
+// Zoekfunctie
+function searchContent() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    pages.forEach(page => {
+        if(page.textContent.toLowerCase().includes(input)) {
+            page.classList.add('active');
+        } else {
+            page.classList.remove('active');
+        }
+    });
+}
+</script>
+
+</body>
+</html>
